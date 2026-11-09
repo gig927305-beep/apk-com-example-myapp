@@ -1,0 +1,58 @@
+name: Build APK
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Create Capacitor project
+        run: |
+          npm init -y
+          npm install @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
+          npx cap init 'yandex-golosa-apk' 'com.example.myapp' --web-dir www
+          npx cap add android
+          npx cap sync android
+      - name: Apply SDK, version, permissions, icons
+        run: |
+          G=android/app/build.gradle
+          V=android/variables.gradle
+          sed -i -E "s/minSdkVersion = [0-9]+/minSdkVersion = 24/" $V
+          sed -i -E "s/targetSdkVersion = [0-9]+/targetSdkVersion = 35/" $V
+          sed -i -E "s/versionCode [0-9]+/versionCode 7/" $G
+          sed -i -E "s/versionName \"[^\"]*\"/versionName \"6.281\"/" $G
+          grep "<uses-permission" AndroidManifest.xml | grep -v INTERNET > perms.txt || true
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i "/<\/manifest>/e cat perms.txt" $M
+          R=android/app/src/main/res
+          rm -rf $R/mipmap-anydpi-v26
+          for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            mkdir -p $R/mipmap-$d
+            cp icons/mipmap-$d/ic_launcher.png $R/mipmap-$d/ic_launcher.png
+            cp icons/mipmap-$d/ic_launcher.png $R/mipmap-$d/ic_launcher_round.png
+            cp icons/mipmap-$d/ic_launcher.png $R/mipmap-$d/ic_launcher_foreground.png
+          done
+      - name: Build debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk app.apk
+          gh release create "build-${{ github.run_number }}" app.apk --repo "${{ github.repository }}" --title "APK build ${{ github.run_number }}" --notes "Debug APK"
