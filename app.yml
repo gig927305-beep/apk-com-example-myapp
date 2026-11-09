@@ -1,0 +1,13 @@
+app:
+  name: "yandex-golosa-apk"
+  package: com.example.myapp
+  min_sdk: 24
+  target_sdk: 35
+  version_name: 6.281
+  version_code: 7
+permissions:
+  - bluetooth
+  - storage_read
+  - storage_write
+  - camera
+  - microphone
