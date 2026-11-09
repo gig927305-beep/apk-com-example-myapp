@@ -1,6 +1,630 @@
-<!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>yandex-golosa-apk</title></head>
-<body style="font-family:sans-serif;padding:24px">
-<h1>yandex-golosa-apk</h1>
-<p>Замените этот файл своим приложением (www/index.html).</p>
-</body></html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0818">
+<title>Alice Voices</title>
+<style>
+  :root{
+    --bg:#0b0818; --glass:rgba(255,255,255,.07); --line:rgba(255,255,255,.13);
+    --text:#f4f1ff; --muted:#a9a2cc; --a:#8b5cf6; --b:#38bdf8; --c:#f472b6; --ok:#34d399;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;overflow-x:hidden}
+
+  /* ---------- фон ---------- */
+  .bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;animation:float 14s ease-in-out infinite}
+  .blob.b1{width:340px;height:340px;background:var(--a);top:-80px;left:-80px}
+  .blob.b2{width:300px;height:300px;background:var(--b);bottom:-60px;right:-60px;animation-delay:-5s}
+  .blob.b3{width:240px;height:240px;background:var(--c);top:40%;left:55%;animation-delay:-9s;opacity:.35}
+  @keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(50px,40px) scale(1.15)}66%{transform:translate(-30px,60px) scale(.92)}}
+  body.dance .blob{animation-duration:2.4s}
+  body.dance .bg{animation:hue 3s linear infinite}
+  @keyframes hue{to{filter:hue-rotate(360deg)}}
+
+  .wrap{position:relative;z-index:1;max-width:600px;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 16px 48px}
+
+  /* ---------- шапка ---------- */
+  .top{display:flex;justify-content:flex-end}
+  .top select{width:auto;padding:8px 12px;font-size:13px;border-radius:999px}
+  .hero{text-align:center;margin:4px 0 18px}
+  h1{font-size:26px;margin:16px 0 4px;letter-spacing:.2px;background:linear-gradient(90deg,#fff,#c4b5fd,#7dd3fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);font-size:14px;margin:0 8px}
+
+  /* ---------- шар ---------- */
+  .stage{position:relative;width:130px;height:130px;margin:10px auto 0}
+  .orbwrap{position:absolute;inset:0}
+  .orb{position:absolute;inset:0;border-radius:50%;animation:breathe 4s ease-in-out infinite;
+       box-shadow:0 0 40px rgba(139,92,246,.7),0 0 100px rgba(56,189,248,.35)}
+  .orb::before{content:"";position:absolute;inset:0;border-radius:50%;
+       background:conic-gradient(from 0deg,#a78bfa,#38bdf8,#34d399,#f472b6,#a78bfa);animation:spin 6s linear infinite}
+  .orb::after{content:"";position:absolute;inset:9px;border-radius:50%;
+       background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.85) 0,rgba(255,255,255,0) 28%),
+                  radial-gradient(circle at 50% 60%,#4c1d95 0,#1e1b4b 70%)}
+  .halo{position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(196,181,253,.9);opacity:0;pointer-events:none}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+  .orb.speaking{animation:talk .55s ease-in-out infinite;box-shadow:0 0 60px rgba(167,139,250,.95),0 0 130px rgba(56,189,248,.55)}
+  @keyframes talk{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+  body.dance .orbwrap{animation:dance .9s ease-in-out infinite}
+  @keyframes dance{
+    0%{transform:translateY(0) rotate(-10deg)}
+    25%{transform:translateY(-18px) rotate(0)}
+    50%{transform:translateY(0) rotate(10deg)}
+    75%{transform:translateY(-18px) rotate(0)}
+    100%{transform:translateY(0) rotate(-10deg)}
+  }
+  .dancers{display:none;justify-content:center;gap:14px;font-size:30px;margin-top:10px;height:40px}
+  body.dance .dancers{display:flex}
+  .dancers span{display:inline-block;animation:hop .9s ease-in-out infinite}
+  .dancers span:nth-child(2){animation-delay:.15s}.dancers span:nth-child(3){animation-delay:.3s}
+  .dancers span:nth-child(4){animation-delay:.45s}.dancers span:nth-child(5){animation-delay:.6s}
+  @keyframes hop{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-14px) rotate(14deg)}}
+
+  /* ---------- карточки ---------- */
+  .card{background:var(--glass);border:1px solid var(--line);border-radius:20px;padding:14px;margin-bottom:14px;
+        -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  label.t{display:flex;justify-content:space-between;font-size:12.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  label.t em{font-style:normal;text-transform:none;letter-spacing:0;color:#c4b5fd}
+  textarea,select{width:100%;background:rgba(10,8,25,.55);color:var(--text);border:1px solid var(--line);border-radius:14px;
+        padding:12px;font-size:16px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
+  textarea{min-height:92px;resize:vertical;font-size:18px;line-height:1.35}
+  textarea:focus,select:focus{border-color:var(--a);box-shadow:0 0 0 3px rgba(139,92,246,.28)}
+  select{font-size:14px;padding:11px}
+  select option,select optgroup{background:#1a1633;color:#f4f1ff}
+  .chips{display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;background:rgba(139,92,246,.18);border:1px solid rgba(167,139,250,.35);color:#ddd6fe;border-radius:999px;padding:8px 14px;font-size:13px;cursor:pointer;white-space:nowrap}
+  .chip:active{transform:scale(.96)}
+
+  .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .mode{position:relative;background:rgba(10,8,25,.5);border:1.5px solid var(--line);border-radius:16px;padding:12px 4px 10px;
+        text-align:center;cursor:pointer;color:var(--text);font-size:12.5px;font-family:inherit;transition:transform .15s,border-color .2s,background .2s}
+  .mode .ic{display:block;font-size:27px;margin-bottom:5px;transition:transform .2s}
+  .mode:active{transform:scale(.95)}
+  .mode.on{border-color:#a78bfa;background:linear-gradient(160deg,rgba(139,92,246,.4),rgba(56,189,248,.18));box-shadow:0 0 22px rgba(139,92,246,.45)}
+  .mode.on .ic{transform:scale(1.18)}
+
+  .row{display:flex;gap:10px}.row>div{flex:1}
+  .gap{margin-top:12px}
+
+  .go{width:100%;border:0;border-radius:18px;padding:17px;font-size:19px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;
+      background:linear-gradient(120deg,#8b5cf6,#6366f1,#38bdf8);background-size:200% 100%;animation:shine 5s linear infinite;
+      box-shadow:0 10px 30px rgba(99,102,241,.5);transition:transform .15s}
+  .go:active{transform:scale(.98)}
+  .go:disabled{opacity:.55;animation:none}
+  @keyframes shine{to{background-position:-200% 0}}
+  .row2{display:flex;gap:10px;margin-top:10px}
+  .ghost{flex:1;border:1px solid var(--line);background:var(--glass);color:var(--text);border-radius:16px;padding:13px;font-size:15px;cursor:pointer;font-family:inherit}
+  .ghost.stop{border-color:#ef4444;color:#fca5a5;display:none}
+  .ghost.stop.show{display:block}
+  .rec{width:100%;margin-bottom:10px;border:1.5px solid rgba(244,114,182,.6);background:linear-gradient(120deg,rgba(244,114,182,.22),rgba(139,92,246,.22));
+       color:#fff;border-radius:18px;padding:15px;font-size:17px;font-weight:600;cursor:pointer;font-family:inherit;transition:transform .15s}
+  .rec:active{transform:scale(.98)}
+  .rec:disabled{opacity:.5}
+  .rec.on{border-color:#ef4444;background:rgba(239,68,68,.3);animation:recpulse 1.1s ease-in-out infinite}
+  @keyframes recpulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.55)}50%{box-shadow:0 0 0 14px rgba(239,68,68,0)}}
+  .orb.listening{animation:talk .8s ease-in-out infinite;box-shadow:0 0 60px rgba(244,114,182,.95),0 0 120px rgba(239,68,68,.5)}
+  .status{text-align:center;color:var(--muted);font-size:14px;min-height:22px;margin-top:14px}
+  .status.live{color:#ddd6fe}
+  .tip{font-size:12.5px;color:var(--muted);line-height:1.55}
+</style>
+</head>
+<body>
+<div class="bg"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+
+<div class="wrap">
+  <div class="top">
+    <select id="ui" aria-label="Language">
+      <option value="ru">Русский</option><option value="en">English</option><option value="es">Español</option>
+      <option value="de">Deutsch</option><option value="fr">Français</option><option value="zh">中文</option>
+    </select>
+  </div>
+
+  <div class="hero">
+    <div class="stage">
+      <div class="orbwrap"><div class="orb" id="orb"></div><div class="halo" id="halo"></div></div>
+    </div>
+    <div class="dancers"><span>💃</span><span>🕺</span><span>🪩</span><span>🕺</span><span>💃</span></div>
+    <h1 data-i18n="title"></h1>
+    <p class="sub" data-i18n="sub"></p>
+  </div>
+
+  <div class="card">
+    <label class="t" for="text"><span data-i18n="request"></span></label>
+    <textarea id="text"></textarea>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div class="card">
+    <label class="t"><span data-i18n="styles"></span></label>
+    <div class="modes" id="modes"></div>
+  </div>
+
+  <div class="card">
+    <label class="t" for="lang"><span data-i18n="lang"></span><em id="vcount"></em></label>
+    <select id="lang"></select>
+    <label class="t gap" for="voice"><span data-i18n="voice"></span></label>
+    <select id="voice"></select>
+    <div class="row gap">
+      <div>
+        <label class="t" for="delay"><span data-i18n="delay"></span></label>
+        <select id="delay"></select>
+      </div>
+      <div>
+        <label class="t" for="repeat"><span data-i18n="rep"></span></label>
+        <select id="repeat"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+      </div>
+    </div>
+  </div>
+
+  <button class="rec" id="rec" data-i18n="rec"></button>
+  <button class="go" id="go" data-i18n="go"></button>
+  <div class="row2">
+    <button class="ghost" id="rand" data-i18n="rand"></button>
+    <button class="ghost stop" id="stop" data-i18n="stop"></button>
+  </div>
+  <div class="status" id="status"></div>
+
+  <div class="card" style="margin-top:14px"><div class="tip" data-i18n="tip"></div></div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+
+/* ================= Переводы ================= */
+const I18N = {
+ ru:{title:'Голоса для Алисы',sub:'Напиши запрос — он прозвучит выбранным голосом.',request:'Запрос',ph:'Алиса, включи музыку',
+  styles:'Стиль голоса',lang:'Язык голоса',voice:'Голос устройства',all:'Все языки',voicesN:'Голосов: {n}',delay:'Пауза перед стартом',
+  now:'Сразу',sec:'сек',rep:'Повторов',go:'▶ Сказать',stop:'■ Стоп',rand:'🎲 Случайный',
+  tip:'Поднеси телефон к колонке и сделай погромче. Настоящий голос Яндекс Алисы в браузере недоступен, поэтому звучат голоса твоего устройства; «Как Алиса» выбирает самый мягкий женский голос из найденных. Алиса откликается на слово «Алиса».',
+  empty:'Сначала напиши запрос.',count:'Старт через {n}… поднеси к колонке',say:'Говорю…',repN:'Повтор {i} из {n}',pause:'Пауза между повторами…',
+  done:'Готово ✓',stopped:'Остановлено.',noTTS:'Браузер не поддерживает озвучку текста.',call:'📞 Звонок…',mic:'🎤 Проверка микрофона…',danceS:'💃 Танцуем!',noVoice:'Голоса не найдены',
+  m:['Обычный','Как Алиса','В микрофон','Громко','Звонок','Детский','Робот','Шёпот','Весёлая','Сонная','Злая','Танцующая'],
+  phrases:['Алиса, включи музыку','Алиса, который час?','Алиса, какая погода?','Алиса, расскажи анекдот','Алиса, потанцуй!']},
+ en:{title:'Voices for Alice',sub:'Type a request and hear it in the voice you choose.',request:'Request',ph:'Alice, play some music',
+  styles:'Voice style',lang:'Voice language',voice:'Device voice',all:'All languages',voicesN:'{n} voices',delay:'Delay before start',
+  now:'Now',sec:'s',rep:'Repeats',go:'▶ Speak',stop:'■ Stop',rand:'🎲 Surprise me',
+  tip:'Hold your phone close to the speaker and turn the volume up. The real Yandex Alice voice isn’t available in a browser, so voices come from your device; “Alice-like” picks the softest female voice it can find. Alice responds to the Russian wake word “Алиса”.',
+  empty:'Type a request first.',count:'Starting in {n}… move closer to the speaker',say:'Speaking…',repN:'Repeat {i} of {n}',pause:'Pause between repeats…',
+  done:'Done ✓',stopped:'Stopped.',noTTS:'This browser has no speech synthesis.',call:'📞 Ringing…',mic:'🎤 Mic check…',danceS:'💃 Dancing!',noVoice:'No voices found',
+  m:['Normal','Alice-like','Microphone','Loud','Phone call','Child','Robot','Whisper','Cheerful','Sleepy','Villain','Dancing'],
+  phrases:['Alice, play some music','Alice, what time is it?','Alice, what’s the weather?','Alice, tell me a joke','Alice, dance!']},
+ es:{title:'Voces para Alicia',sub:'Escribe una petición y escúchala con la voz que elijas.',request:'Petición',ph:'Alicia, pon música',
+  styles:'Estilo de voz',lang:'Idioma de la voz',voice:'Voz del dispositivo',all:'Todos los idiomas',voicesN:'{n} voces',delay:'Pausa antes de empezar',
+  now:'Ya',sec:'s',rep:'Repeticiones',go:'▶ Decir',stop:'■ Parar',rand:'🎲 Sorpréndeme',
+  tip:'Acerca el teléfono al altavoz y sube el volumen. La voz real de Yandex Alisa no está disponible en el navegador, así que se usan las voces de tu dispositivo; «Tipo Alicia» elige la voz femenina más suave. Alisa responde a la palabra «Алиса».',
+  empty:'Escribe primero una petición.',count:'Empieza en {n}… acércate al altavoz',say:'Hablando…',repN:'Repetición {i} de {n}',pause:'Pausa entre repeticiones…',
+  done:'Listo ✓',stopped:'Detenido.',noTTS:'Este navegador no admite síntesis de voz.',call:'📞 Llamando…',mic:'🎤 Prueba de micrófono…',danceS:'💃 ¡A bailar!',noVoice:'No hay voces',
+  m:['Normal','Tipo Alicia','Micrófono','Fuerte','Llamada','Niño','Robot','Susurro','Alegre','Dormida','Malvada','Bailarina'],
+  phrases:['Alicia, pon música','Alicia, ¿qué hora es?','Alicia, ¿qué tiempo hace?','Alicia, cuéntame un chiste','Alicia, ¡baila!']},
+ de:{title:'Stimmen für Alice',sub:'Tippe eine Anfrage – sie wird in der gewählten Stimme gesprochen.',request:'Anfrage',ph:'Alice, spiel Musik',
+  styles:'Stimmstil',lang:'Sprache der Stimme',voice:'Gerätestimme',all:'Alle Sprachen',voicesN:'{n} Stimmen',delay:'Pause vor dem Start',
+  now:'Sofort',sec:'s',rep:'Wiederholungen',go:'▶ Sprechen',stop:'■ Stopp',rand:'🎲 Zufall',
+  tip:'Halte das Handy nah an den Lautsprecher und stelle die Lautstärke hoch. Die echte Yandex-Alisa-Stimme gibt es im Browser nicht, daher kommen die Stimmen von deinem Gerät; „Wie Alice“ wählt die weichste weibliche Stimme. Alisa reagiert auf das Wort „Алиса“.',
+  empty:'Bitte zuerst eine Anfrage eingeben.',count:'Start in {n}… näher an den Lautsprecher',say:'Spreche…',repN:'Wiederholung {i} von {n}',pause:'Pause zwischen Wiederholungen…',
+  done:'Fertig ✓',stopped:'Gestoppt.',noTTS:'Dieser Browser unterstützt keine Sprachausgabe.',call:'📞 Es klingelt…',mic:'🎤 Mikrofontest…',danceS:'💃 Tanzzeit!',noVoice:'Keine Stimmen gefunden',
+  m:['Normal','Wie Alice','Mikrofon','Laut','Anruf','Kind','Roboter','Flüstern','Fröhlich','Müde','Böse','Tanzend'],
+  phrases:['Alice, spiel Musik','Alice, wie spät ist es?','Alice, wie ist das Wetter?','Alice, erzähl einen Witz','Alice, tanz!']},
+ fr:{title:'Voix pour Alice',sub:'Écris une demande, elle sera dite avec la voix choisie.',request:'Demande',ph:'Alice, mets de la musique',
+  styles:'Style de voix',lang:'Langue de la voix',voice:'Voix de l’appareil',all:'Toutes les langues',voicesN:'{n} voix',delay:'Pause avant le départ',
+  now:'Tout de suite',sec:'s',rep:'Répétitions',go:'▶ Dire',stop:'■ Stop',rand:'🎲 Surprise',
+  tip:'Approche le téléphone de l’enceinte et monte le volume. La vraie voix de Yandex Alisa n’existe pas dans un navigateur : les voix viennent de ton appareil ; « Style Alice » choisit la voix féminine la plus douce. Alisa répond au mot « Алиса ».',
+  empty:'Écris d’abord une demande.',count:'Départ dans {n}… approche de l’enceinte',say:'Je parle…',repN:'Répétition {i} sur {n}',pause:'Pause entre les répétitions…',
+  done:'Terminé ✓',stopped:'Arrêté.',noTTS:'Ce navigateur ne gère pas la synthèse vocale.',call:'📞 Ça sonne…',mic:'🎤 Test du micro…',danceS:'💃 On danse !',noVoice:'Aucune voix trouvée',
+  m:['Normal','Style Alice','Micro','Fort','Appel','Enfant','Robot','Chuchoté','Joyeuse','Endormie','Méchante','Dansante'],
+  phrases:['Alice, mets de la musique','Alice, quelle heure est-il ?','Alice, quel temps fait-il ?','Alice, raconte une blague','Alice, danse !']},
+ zh:{title:'爱丽丝语音',sub:'输入一句话，用你选的声音朗读出来。',request:'指令',ph:'爱丽丝，放点音乐',
+  styles:'声音风格',lang:'语音语言',voice:'设备语音',all:'所有语言',voicesN:'{n} 个语音',delay:'开始前等待',
+  now:'立即',sec:'秒',rep:'重复次数',go:'▶ 朗读',stop:'■ 停止',rand:'🎲 随机',
+  tip:'把手机靠近音箱并调大音量。浏览器里无法使用 Yandex 爱丽丝的原声，因此使用设备自带的语音；“爱丽丝风格”会选择最柔和的女声。爱丽丝只响应俄语唤醒词“Алиса”。',
+  empty:'请先输入内容。',count:'{n} 秒后开始… 请靠近音箱',say:'朗读中…',repN:'第 {i} / {n} 次',pause:'重复之间暂停…',
+  done:'完成 ✓',stopped:'已停止。',noTTS:'此浏览器不支持语音合成。',call:'📞 响铃中…',mic:'🎤 麦克风测试…',danceS:'💃 跳起来！',noVoice:'未找到语音',
+  m:['普通','爱丽丝风格','麦克风','大声','来电','儿童','机器人','耳语','开心','困倦','反派','跳舞'],
+  phrases:['爱丽丝，放点音乐','爱丽丝，现在几点？','爱丽丝，天气怎么样？','爱丽丝，讲个笑话','爱丽丝，跳个舞！']}
+};
+const LOCALE = {ru:'ru-RU',en:'en-US',es:'es-ES',de:'de-DE',fr:'fr-FR',zh:'zh-CN'};
+
+const REC = {
+ ru:{rec:'🎙 Записать и повторить',recStop:'■ Остановить запись',listening:'Слушаю… говори. Нажми ещё раз, чтобы закончить',nospeech:'Ничего не услышала. Попробуй ещё раз.',micDenied:'Нет доступа к микрофону. Разреши его в настройках браузера.',noSR:'Распознавание речи не поддерживается в этом браузере. Попробуй Chrome или Safari.'},
+ en:{rec:'🎙 Record & repeat',recStop:'■ Stop recording',listening:'Listening… speak now. Tap again to finish',nospeech:'Didn’t catch anything. Try again.',micDenied:'No microphone access. Allow it in your browser settings.',noSR:'Speech recognition isn’t supported in this browser. Try Chrome or Safari.'},
+ es:{rec:'🎙 Grabar y repetir',recStop:'■ Detener grabación',listening:'Escuchando… habla ahora. Toca otra vez para terminar',nospeech:'No oí nada. Inténtalo de nuevo.',micDenied:'Sin acceso al micrófono. Permítelo en los ajustes del navegador.',noSR:'Este navegador no admite reconocimiento de voz. Prueba Chrome o Safari.'},
+ de:{rec:'🎙 Aufnehmen & wiederholen',recStop:'■ Aufnahme stoppen',listening:'Ich höre zu… sprich jetzt. Zum Beenden erneut tippen',nospeech:'Nichts verstanden. Versuch es nochmal.',micDenied:'Kein Mikrofonzugriff. Erlaube ihn in den Browsereinstellungen.',noSR:'Spracherkennung wird in diesem Browser nicht unterstützt. Probiere Chrome oder Safari.'},
+ fr:{rec:'🎙 Enregistrer et répéter',recStop:'■ Arrêter l’enregistrement',listening:'J’écoute… parle maintenant. Touche à nouveau pour finir',nospeech:'Je n’ai rien entendu. Réessaie.',micDenied:'Pas d’accès au micro. Autorise-le dans les réglages du navigateur.',noSR:'La reconnaissance vocale n’est pas prise en charge ici. Essaie Chrome ou Safari.'},
+ zh:{rec:'🎙 录音并复述',recStop:'■ 停止录音',listening:'正在聆听… 请说话，再点一次结束',nospeech:'没听到内容，请再试一次。',micDenied:'无法使用麦克风，请在浏览器设置中允许。',noSR:'此浏览器不支持语音识别，请试试 Chrome 或 Safari。'}
+};
+Object.keys(REC).forEach(l => Object.assign(I18N[l], REC[l]));
+
+let ui = (navigator.language || 'en').slice(0, 2).toLowerCase();
+if (!I18N[ui]) ui = 'en';
+const t = (k, v = {}) => String(I18N[ui][k] ?? k).replace(/\{(\w+)\}/g, (_, x) => v[x]);
+
+/* ================= Стили голоса ================= */
+const MODES = [
+  {k:'normal', ic:'🗣️', pitch:1,    rate:1,    vol:.9},
+  {k:'alice',  ic:'🔮', pitch:1.12, rate:1.04, vol:1},
+  {k:'mic',    ic:'🎤', pitch:.9,   rate:.92,  vol:1},
+  {k:'loud',   ic:'📢', pitch:1,    rate:.9,   vol:1},
+  {k:'phone',  ic:'📞', pitch:1,    rate:1,    vol:.8},
+  {k:'child',  ic:'🧒', pitch:2,    rate:1.1,  vol:1},
+  {k:'robot',  ic:'🤖', pitch:.1,   rate:.75,  vol:1},
+  {k:'whisper',ic:'🤫', pitch:1.1,  rate:.88,  vol:.45},
+  {k:'cheer',  ic:'😄', pitch:1.55, rate:1.15, vol:1},
+  {k:'sleepy', ic:'😴', pitch:.75,  rate:.6,   vol:.7},
+  {k:'evil',   ic:'😈', pitch:.25,  rate:.7,   vol:1},
+  {k:'dance',  ic:'💃', pitch:1.4,  rate:1.1,  vol:1}
+];
+let mode = 'normal', voices = [], cancelled = false, running = false;
+
+/* ================= Интерфейс ================= */
+function applyI18n() {
+  document.documentElement.lang = ui;
+  document.querySelectorAll('[data-i18n]').forEach(e => e.textContent = t(e.dataset.i18n));
+  $('#text').placeholder = t('ph');
+  renderModes(); renderChips(); renderDelay();
+  buildLangSelect(); buildVoiceSelect();
+}
+function renderModes() {
+  const box = $('#modes'); box.innerHTML = '';
+  MODES.forEach((m, i) => {
+    const b = document.createElement('button');
+    b.className = 'mode' + (m.k === mode ? ' on' : '');
+    b.dataset.k = m.k;
+    b.innerHTML = '<span class="ic"></span><span class="nm"></span>';
+    b.querySelector('.ic').textContent = m.ic;
+    b.querySelector('.nm').textContent = I18N[ui].m[i];
+    b.onclick = () => selectMode(m.k);
+    box.appendChild(b);
+  });
+}
+function selectMode(k) {
+  mode = k;
+  document.querySelectorAll('.mode').forEach(x => x.classList.toggle('on', x.dataset.k === k));
+  if (k === 'alice') pickBest(true);
+}
+function renderChips() {
+  const box = $('#chips'); box.innerHTML = '';
+  I18N[ui].phrases.forEach(p => {
+    const c = document.createElement('span');
+    c.className = 'chip'; c.textContent = p;
+    c.onclick = () => { $('#text').value = p; };
+    box.appendChild(c);
+  });
+  const all = Object.values(I18N).flatMap(x => x.phrases);
+  const cur = $('#text').value.trim();
+  if (!cur || all.includes(cur)) $('#text').value = I18N[ui].phrases[0];
+}
+function renderDelay() {
+  const sel = $('#delay'), prev = sel.value || '3';
+  sel.innerHTML = '';
+  [[0, t('now')], [3, '3 ' + t('sec')], [5, '5 ' + t('sec')], [10, '10 ' + t('sec')]].forEach(([v, l]) => sel.appendChild(opt(v, l)));
+  sel.value = prev;
+}
+function opt(v, text) { const o = document.createElement('option'); o.value = v; o.textContent = text; return o; }
+
+/* ================= Голоса устройства ================= */
+const code = v => v.lang.split(/[-_]/)[0].toLowerCase();
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+function langName(c) { try { return cap(new Intl.DisplayNames([ui], {type:'language'}).of(c)); } catch (e) { return c; } }
+const FEMALE = /milena|alena|alyona|irina|svetlana|katya|yelena|tatyana|samantha|victoria|karen|zira|hazel|susan|ava\b|allison|female|woman|paulina|monica|am[eé]lie|marie|anna|helena|elena|kyoko|ting-?ting|mei-?jia|sin-?ji|google/i;
+
+function loadVoices() {
+  if (!('speechSynthesis' in window)) return;
+  voices = speechSynthesis.getVoices().slice().sort((a, b) => a.lang.localeCompare(b.lang) || a.name.localeCompare(b.name));
+  buildLangSelect(); buildVoiceSelect();
+}
+function buildLangSelect() {
+  const sel = $('#lang'), prev = sel.value;
+  const codes = [...new Set(voices.map(code))].sort((a, b) => langName(a).localeCompare(langName(b), ui));
+  sel.innerHTML = '';
+  sel.appendChild(opt('all', `🌍 ${t('all')} (${codes.length})`));
+  codes.forEach(c => sel.appendChild(opt(c, `${langName(c)} (${voices.filter(v => code(v) === c).length})`)));
+  sel.value = prev && (prev === 'all' || codes.includes(prev)) ? prev : (codes.includes(ui) ? ui : 'all');
+}
+function filtered() { const l = $('#lang').value; return voices.filter(v => l === 'all' || code(v) === l); }
+function buildVoiceSelect() {
+  const sel = $('#voice'), prev = sel.value, list = filtered();
+  sel.innerHTML = '';
+  $('#vcount').textContent = t('voicesN', {n: list.length});
+  if (!list.length) { sel.appendChild(opt('', t('noVoice'))); return; }
+  const mk = v => opt(v.voiceURI, `${v.name}${v.localService ? '' : ' ☁'}`);
+  if ($('#lang').value === 'all') {
+    const groups = {};
+    list.forEach(v => (groups[code(v)] = groups[code(v)] || []).push(v));
+    Object.keys(groups).sort((a, b) => langName(a).localeCompare(langName(b), ui)).forEach(c => {
+      const g = document.createElement('optgroup'); g.label = langName(c);
+      groups[c].forEach(v => g.appendChild(mk(v)));
+      sel.appendChild(g);
+    });
+  } else list.forEach(v => sel.appendChild(mk(v)));
+  if (list.some(v => v.voiceURI === prev)) sel.value = prev; else pickBest(false);
+}
+function pickBest(force) {
+  const list = filtered(); if (!list.length) return;
+  const best = list.find(v => FEMALE.test(v.name)) || list[0];
+  if (force || !$('#voice').value) $('#voice').value = best.voiceURI;
+  else $('#voice').value = best.voiceURI;
+}
+const curVoice = () => voices.find(v => v.voiceURI === $('#voice').value);
+
+/* ================= Аудио ================= */
+let ctx = null, live = [], timers = [], noiseBuf = null;
+const sleepers = new Set();
+function ensureCtx() {
+  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+  if (ctx.state === 'suspended') ctx.resume();
+}
+const track = n => { live.push(n); return n; };
+function stopLive() {
+  timers.forEach(clearInterval); timers = [];
+  live.forEach(n => { try { n.stop(); } catch (e) {} try { n.disconnect(); } catch (e) {} });
+  live = [];
+}
+function sleep(ms) {
+  return new Promise(r => {
+    const fin = () => { clearTimeout(id); sleepers.delete(fin); r(); };
+    const id = setTimeout(fin, ms);
+    sleepers.add(fin);
+  });
+}
+function wakeAll() { [...sleepers].forEach(f => f()); }
+
+function tone(freq, when, dur, type = 'sine', gain = .2) {
+  const t0 = ctx.currentTime + Math.max(0, when);
+  const o = track(ctx.createOscillator()), g = ctx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(gain, t0 + .01);
+  g.gain.setValueAtTime(gain, t0 + Math.max(.02, dur - .03));
+  g.gain.linearRampToValueAtTime(0, t0 + dur);
+  o.connect(g).connect(ctx.destination);
+  o.start(t0); o.stop(t0 + dur + .02);
+}
+function getNoise() {
+  if (noiseBuf) return noiseBuf;
+  noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+  const d = noiseBuf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  return noiseBuf;
+}
+function noiseChain(gain, lo, hi, loop) {
+  const src = track(ctx.createBufferSource());
+  src.buffer = getNoise(); src.loop = loop;
+  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = lo;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = hi;
+  const g = ctx.createGain(); g.gain.value = gain;
+  src.connect(hp).connect(lp).connect(g).connect(ctx.destination);
+  return {src, g};
+}
+function hiss(gain, lo, hi) { noiseChain(gain, lo, hi, true).src.start(); }
+function burst(when, dur, gain, lo, hi) {
+  const t0 = ctx.currentTime + Math.max(0, when);
+  const {src, g} = noiseChain(gain, lo, hi, false);
+  g.gain.setValueAtTime(gain, t0);
+  g.gain.exponentialRampToValueAtTime(.001, t0 + dur);
+  src.start(t0); src.stop(t0 + dur + .02);
+}
+function kick(when) {
+  const t0 = ctx.currentTime + Math.max(0, when);
+  const o = track(ctx.createOscillator()), g = ctx.createGain();
+  o.frequency.setValueAtTime(160, t0);
+  o.frequency.exponentialRampToValueAtTime(40, t0 + .15);
+  g.gain.setValueAtTime(.8, t0);
+  g.gain.exponentialRampToValueAtTime(.001, t0 + .25);
+  o.connect(g).connect(ctx.destination);
+  o.start(t0); o.stop(t0 + .3);
+}
+
+/* ================= Орб ================= */
+function setOrb(on) { $('#orb').classList.toggle('speaking', on); }
+function ripple() {
+  try { $('#halo').animate([{transform:'scale(1)', opacity:.8}, {transform:'scale(1.6)', opacity:0}], {duration:540, easing:'ease-out'}); } catch (e) {}
+}
+
+/* ================= Речь ================= */
+function say(text, p) {
+  return new Promise(res => {
+    if (cancelled) return res();
+    let done = false;
+    const fin = () => { if (done) return; done = true; clearTimeout(tm); sleepers.delete(fin); res(); };
+    const tm = setTimeout(fin, 12000 + text.length * 170);
+    sleepers.add(fin);
+    const u = new SpeechSynthesisUtterance(text);
+    const v = curVoice();
+    if (v) { u.voice = v; u.lang = v.lang; } else u.lang = LOCALE[ui];
+    u.pitch = p.pitch; u.rate = p.rate; u.volume = p.vol;
+    u.onstart = () => { setOrb(true); ripple(); };
+    u.onboundary = ripple;
+    u.onend = fin; u.onerror = fin;
+    speechSynthesis.speak(u);
+  });
+}
+async function wordByWord(text, pf, gap) {
+  const words = text.split(/\s+/).filter(Boolean);
+  for (let i = 0; i < words.length && !cancelled; i++) {
+    await say(words[i], pf(i));
+    await sleep(gap);
+  }
+}
+
+async function danceSpeak(text) {
+  const bpm = 116, beat = 60 / bpm, start = ctx.currentTime + .15, bass = [55, 55, 73.4, 65.4];
+  let n = 0;
+  const tick = () => {
+    while (start + n * beat < ctx.currentTime + .4) {
+      const w = start + n * beat - ctx.currentTime;
+      kick(w);
+      burst(w + beat / 2, .05, .22, 6000, 14000);
+      if (n % 2 === 1) burst(w, .12, .35, 1200, 5000);
+      tone(bass[n % 4], w, beat * .85, 'triangle', .16);
+      n++;
+    }
+  };
+  tick(); timers.push(setInterval(tick, 100));
+  await sleep(beat * 2000);
+  const words = text.split(/\s+/).filter(Boolean);
+  for (let i = 0; i < words.length && !cancelled; i++) {
+    const now = ctx.currentTime, k = Math.ceil((now - start) / beat);
+    await sleep(Math.max(0, (start + k * beat - now) * 1000));
+    if (cancelled) break;
+    await say(words[i], {pitch: i % 2 ? 1.9 : 1.3, rate: 1.2, vol: 1});
+  }
+  await sleep(beat * 2000);
+}
+
+async function playOnce(text) {
+  const m = MODES.find(x => x.k === mode);
+  ensureCtx();
+  setStatus(t('say'), true);
+
+  if (mode === 'alice') {
+    tone(659, 0, .2, 'sine', .15); tone(988, .12, .3, 'sine', .12); tone(1319, .26, .5, 'sine', .08);
+    await sleep(750);
+  }
+  if (mode === 'phone') {
+    setStatus(t('call'), true);
+    for (let c = 0; c < 2; c++) for (let i = 0; i < 4; i++) tone(i % 2 ? 1250 : 950, c * 1.4 + i * .18, .14, 'square', .12);
+    await sleep(2900);
+    burst(0, .07, .3, 800, 4000);
+    await sleep(450);
+    hiss(.025, 300, 3400);
+  }
+  if (mode === 'mic') {
+    setStatus(t('mic'), true);
+    [0, .3].forEach(w => { tone(110, w, .09, 'sine', .35); burst(w, .06, .3, 200, 2500); });
+    await sleep(800);
+    hiss(.02, 2000, 9000); tone(60, 0, 900, 'sine', .025);
+  }
+  if (mode === 'loud') { tone(880, 0, .12, 'sine', .2); await sleep(350); }
+  if (mode === 'whisper') hiss(.02, 3500, 10000);
+  if (mode === 'cheer') { [784, 988, 1175, 1568].forEach((f, i) => tone(f, i * .09, .16, 'triangle', .12)); await sleep(550); }
+  if (mode === 'sleepy') { tone(130, 0, 900, 'sine', .03); await sleep(300); }
+  if (mode === 'evil') { burst(0, 1.4, .5, 30, 200); tone(55, 0, 900, 'sawtooth', .03); await sleep(1000); }
+  if (mode === 'robot') {
+    [800, 1200, 600, 1000].forEach((f, i) => tone(f, i * .11, .08, 'square', .1));
+    await sleep(650);
+    const o = track(ctx.createOscillator()), g = ctx.createGain(), lfo = track(ctx.createOscillator()), lg = ctx.createGain();
+    g.gain.value = .035; lg.gain.value = .03;
+    o.type = 'sawtooth'; o.frequency.value = 70; lfo.frequency.value = 9;
+    lfo.connect(lg).connect(g.gain); o.connect(g).connect(ctx.destination);
+    o.start(); lfo.start();
+  }
+  if (cancelled) return;
+
+  if (mode === 'robot') await wordByWord(text, () => m, 180);
+  else if (mode === 'dance') { document.body.classList.add('dance'); setStatus(t('danceS'), true); await danceSpeak(text); }
+  else await say(text, m);
+
+  if (mode === 'phone' && !cancelled) {
+    await sleep(300); burst(0, .06, .25, 800, 4000); tone(425, .1, .25, 'sine', .1); await sleep(500);
+  }
+  stopLive(); setOrb(false);
+  document.body.classList.remove('dance');
+}
+
+/* ================= Запуск ================= */
+function setStatus(s, live) { const e = $('#status'); e.textContent = s; e.classList.toggle('live', !!live); }
+function setBusy(b) { running = b; $('#go').disabled = b; $('#rec').disabled = b; $('#stop').classList.toggle('show', b); $('#rand').style.display = b ? 'none' : ''; }
+function cleanup() {
+  stopLive(); setOrb(false); document.body.classList.remove('dance'); setBusy(false);
+}
+async function run(instant) {
+  if (!('speechSynthesis' in window)) { setStatus(t('noTTS')); return; }
+  const text = $('#text').value.trim();
+  if (!text) { setStatus(t('empty')); return; }
+  cancelled = false; setBusy(true); speechSynthesis.cancel(); ensureCtx();
+  for (let s = instant ? 0 : +$('#delay').value; s > 0 && !cancelled; s--) { setStatus(t('count', {n: s}), true); await sleep(1000); }
+  const reps = +$('#repeat').value;
+  for (let i = 0; i < reps && !cancelled; i++) {
+    if (reps > 1) setStatus(t('repN', {i: i + 1, n: reps}), true);
+    await playOnce(text);
+    if (i < reps - 1 && !cancelled) { setStatus(t('pause'), true); await sleep(3000); }
+  }
+  const was = cancelled;
+  cleanup();
+  setStatus(was ? t('stopped') : t('done'));
+}
+/* ---------- Запись голоса: слушаем и повторяем ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog = null, listening = false;
+function setListening(on) {
+  listening = on;
+  $('#rec').classList.toggle('on', on);
+  $('#rec').textContent = t(on ? 'recStop' : 'rec');
+  $('#orb').classList.toggle('listening', on);
+}
+let session = null;
+function toggleRec() {
+  if (running) return;
+  if (!SR) { setStatus(t('noSR')); return; }
+
+  // Второе нажатие: сразу останавливаем запись и забираем то, что успели услышать
+  if (listening && session) {
+    session.finish();
+    return;
+  }
+
+  try { speechSynthesis.cancel(); } catch (e) {}
+  const s = session = {heard: '', err: '', done: false, rec: new SR()};
+  const rec = s.rec;
+  rec.lang = LOCALE[ui];
+  rec.interimResults = true;
+  rec.continuous = false;
+
+  s.finish = () => {
+    if (s.done) return;
+    s.done = true;
+    clearTimeout(s.guard);
+    setListening(false);
+    try { rec.onresult = rec.onerror = rec.onend = null; } catch (e) {}
+    try { rec.stop(); } catch (e) {}
+    setTimeout(() => { try { rec.abort(); } catch (e) {} }, 300);
+    session = null;
+    if (s.err === 'not-allowed' || s.err === 'service-not-allowed') { setStatus(t('micDenied')); return; }
+    if (s.heard) run(true); else setStatus(t('nospeech'));
+  };
+
+  rec.onresult = e => {
+    let txt = '';
+    for (let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript;
+    s.heard = txt.trim();
+    $('#text').value = s.heard;
+  };
+  rec.onerror = e => { s.err = e.error || ''; if (s.err !== 'no-speech' && s.err !== 'aborted') s.finish(); };
+  rec.onend = () => s.finish();
+
+  try {
+    rec.start();
+    setListening(true);
+    setStatus(t('listening'), true);
+    s.guard = setTimeout(s.finish, 30000); // защита: не слушаем дольше 30 секунд
+  } catch (e) {
+    session = null; setListening(false); setStatus(t('noSR'));
+  }
+}
+$('#rec').onclick = toggleRec;
+
+$('#go').onclick = () => run();
+$('#stop').onclick = () => { cancelled = true; speechSynthesis.cancel(); wakeAll(); cleanup(); setStatus(t('stopped')); };
+$('#rand').onclick = () => {
+  const m = MODES[Math.floor(Math.random() * MODES.length)];
+  selectMode(m.k);
+  const list = filtered();
+  if (list.length) $('#voice').value = list[Math.floor(Math.random() * list.length)].voiceURI;
+  const v = curVoice();
+  setStatus('🎲 ' + I18N[ui].m[MODES.indexOf(m)] + (v ? ' · ' + v.name : ''), true);
+};
+$('#lang').onchange = buildVoiceSelect;
+$('#ui').onchange = e => { ui = e.target.value; $('#lang').value = ''; applyI18n(); };
+
+/* ================= Старт ================= */
+$('#ui').value = ui;
+applyI18n();
+if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+else setStatus(t('noTTS'));
+</script>
+</body>
+</html>
